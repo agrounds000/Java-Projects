@@ -1,13 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collections;
 
-/*
- * About this project:
- * The goal of this project is to 
- * 
- * */
-
-
 public class Driver {
 
 	public static void main(String[] args) {
