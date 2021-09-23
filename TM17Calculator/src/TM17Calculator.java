@@ -6,14 +6,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import java.awt.Font;
 import java.awt.event.ItemListener;
-import java.io.UnsupportedEncodingException;
 import java.awt.event.ItemEvent;
 import javax.swing.JTextField;
 import java.awt.event.KeyAdapter;
@@ -49,54 +47,6 @@ public class TM17Calculator {
 
 	private void initialize() {
 
-		// load up arraylists with data from db
-		// in the future, maybe load data dynamically instead of storing it all at once
-
-		ArrayList<String> pokemon = new ArrayList<String>(255);
-		ArrayList<String> moves = new ArrayList<String>(255);
-		ArrayList<String> items = new ArrayList<String>(255);
-
-		String jdbc = "jdbc:derby:database;create=true;useUnicode=yes;characterEncoding=UTF-8";
-
-		try {
-			Connection connection = DriverManager.getConnection(jdbc);
-
-			// add pokemon to the pokemon arraylist
-			String sql = "SELECT pokemon FROM table1";
-			Statement statement = connection.createStatement();
-			ResultSet rs = statement.executeQuery(sql);
-
-			while (rs.next()) {
-				pokemon.add(rs.getString("pokemon"));
-			}
-
-			// add moves to the move arraylist
-			sql = "SELECT move FROM table1";
-			rs = statement.executeQuery(sql);
-
-			while (rs.next()) {
-				moves.add(rs.getString("move"));
-			}
-
-			// add items to the items arraylist
-			sql = "SELECT item FROM table1";
-			rs = statement.executeQuery(sql);
-			while (rs.next()) {
-				items.add(rs.getString("item"));
-			}
-
-//			  String shutdownURL = "jdbc:derby:;shutdown=true";
-//			  DriverManager.getConnection(shutdownURL);
-
-		} catch (SQLException e) {
-
-			if (e.getSQLState().equals("XJ015")) {
-				System.out.println("DerbyShutdown.");
-			} else {
-				e.printStackTrace();
-			}
-		}
-
 		// create GUI elements
 		frame = new JFrame();
 		frame.getContentPane().setEnabled(false);
@@ -108,20 +58,23 @@ public class TM17Calculator {
 		lblFinalBoxName.setBounds(436, 472, 135, 25);
 		frame.getContentPane().add(lblFinalBoxName);
 
-		// default selection is "change species" as seen in the next code block, so show
-		// pokemon list by default
+		// default selection is "change species" as seen in the next code block
+		// so show pokemon list by default
 		JComboBox comboBoxChoiceTwo = new JComboBox();
 		comboBoxChoiceTwo.setToolTipText("Pokemon/Item/Move that you want");
-		comboBoxChoiceTwo.setModel(new DefaultComboBoxModel(pokemon.toArray()));
+		comboBoxChoiceTwo
+				.setModel(new DefaultComboBoxModel(runDBQuery("SELECT pokemon FROM table1", "pokemon").toArray()));
 		comboBoxChoiceTwo.setBounds(21, 195, 152, 33);
 		frame.getContentPane().add(comboBoxChoiceTwo);
 		setAddress("?,?e");
 
-		// Options that are planned to be supported, stat exp is not yet implemented.
-		// Add array elements to the combo box to start.
+		// Options that are currently supported:
 		String choiceOneOptions[] = { "Change Species", "Change Held Item", "Move 1", "Move 2", "Move 3", "Move 4",
 				"HP Stat exp", "Attack Stat exp", "Defense Stat exp", "Speed Stat exp", "Special Stat exp",
-				"Atk/Def DVs", "Spe/Spc DVs", "Friendship", "Pokerus", "Level", "Item #2 ID", "Item #2 Quantity", "Ball Item #2 ID", "Ball Item #2 Quantity"};
+				"Atk/Def DVs", "Spe/Spc DVs", "Friendship", "Pokerus", "Level", "Item #2 ID", "Item #2 Quantity",
+				"Ball Item #2 ID", "Ball Item #2 Quantity" };
+		
+		// Add array elements to the combo box to start.
 		JComboBox comboBoxChoiceOne = new JComboBox(choiceOneOptions);
 		comboBoxChoiceOne.setToolTipText("Edit Party Pokemon #3");
 
@@ -131,132 +84,125 @@ public class TM17Calculator {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 					String choice = comboBoxChoiceOne.getSelectedItem().toString();
 
-					// when a choice is made, see what the user clicked on and change info in the
-					// other combo box
-					// for example if Change Species is clicked on right here it shows list of
-					// pokemon
-
 					textField.setEnabled(false);
 					textField.setEditable(false);
 					textField.setVisible(false);
 					comboBoxChoiceTwo.setEnabled(true);
-					
-					if (choice == "Change Species") {
-						comboBoxChoiceTwo.setModel(new DefaultComboBoxModel(pokemon.toArray()));
+
+					// set address and tooltip depending on what is selected
+					// need to find a better way to better optimize several conditionals
+					// when a choice is made, see what the user clicked on and change info in the other combo box
+					// for example if Change Species is clicked on right here it shows list of pokemon
+					switch (choice) {
+					case "Change Species":
+						comboBoxChoiceTwo.setModel(new DefaultComboBoxModel(
+								runDBQuery("SELECT pokemon FROM table1", "pokemon").toArray()));
 						setAddress("?,?e");
-					} else if (choice == "Change Held Item") {
-						comboBoxChoiceTwo.setModel(new DefaultComboBoxModel(items.toArray()));
+						break;
+					case "Change Held Item":
+						comboBoxChoiceTwo.setModel(
+								new DefaultComboBoxModel(runDBQuery("SELECT item FROM table1", "item").toArray()));
 						setAddress("?,?f");
-					}
+						break;
 
-					else if (choice.contains("Move")) {
-						comboBoxChoiceTwo.setModel(new DefaultComboBoxModel(moves.toArray()));
+					case "Move 1":
+						comboBoxChoiceTwo.setModel(
+								new DefaultComboBoxModel(runDBQuery("SELECT move FROM table1", "move").toArray()));
+						setAddress("?,?g");
+						break;
+					case "Move 2":
+						comboBoxChoiceTwo.setModel(
+								new DefaultComboBoxModel(runDBQuery("SELECT move FROM table1", "move").toArray()));
+						setAddress("?,?h");
+						break;
+					case "Move 3":
+						comboBoxChoiceTwo.setModel(
+								new DefaultComboBoxModel(runDBQuery("SELECT move FROM table1", "move").toArray()));
+						setAddress("?,?i");
+						break;
+					case "Move 4":
+						comboBoxChoiceTwo.setModel(
+								new DefaultComboBoxModel(runDBQuery("SELECT move FROM table1", "move").toArray()));
+						setAddress("?,?j");
+						break;
 
-						if (choice == "Move 1")
-							setAddress("?,?g");
-						if (choice == "Move 2")
-							setAddress("?,?h");
-						if (choice == "Move 3")
-							setAddress("?,?i");
-						if (choice == "Move 4")
-							setAddress("?,?j");
-					}
-
-					else if (choice == "Item #2 ID") {
-						comboBoxChoiceTwo.setModel(new DefaultComboBoxModel(items.toArray()));
+					case "Item #2 ID":
+						comboBoxChoiceTwo.setModel(
+								new DefaultComboBoxModel(runDBQuery("SELECT item FROM table1", "item").toArray()));
 						setAddress("PK,'s?");
-					} else if (choice == "Ball Item #2 ID") {
-						comboBoxChoiceTwo.setModel(new DefaultComboBoxModel(items.toArray()));
+						break;
+					case "Ball Item #2 ID":
+						comboBoxChoiceTwo.setModel(
+								new DefaultComboBoxModel(runDBQuery("SELECT item FROM table1", "item").toArray()));
 						setAddress("PK, A");
-					}
+						break;
 
-					else if (choice.contains("exp")) {
-						textField.setVisible(true);
-						textField.setEnabled(true);
-						textField.setEditable(true);
-						
-						comboBoxChoiceTwo.setEnabled(false);
+					case "HP Stat exp":
+						setAddress(" ?,?p");
+						break;
+					case "Attack Stat exp":
+						setAddress("?,?r");
+						break;
+					case "Defense Stat exp":
+						setAddress("?,?t");
+						break;
+					case "Speed Stat exp":
+						setAddress("?,?v");
+						break;
+					case "Special Stat exp":
+						setAddress("?,?x");
+						break;
 
-						if (choice == "HP Stat exp")	
-							setAddress(" ?,?p");
-						else if (choice == "Attack Stat exp")
-							setAddress("?,?r");
-						else if (choice == "Defense Stat exp")
-							setAddress("?,?t");
-						else if (choice == "Speed Stat exp")
-							setAddress("?,?v");
-						else if (choice == "Special Stat exp")
-							setAddress("?,?x");
-						
-						textField.setToolTipText("Set to FF for max stat experience.");
+					case "Atk/Def DVs":
+						setAddress("?,?z");
+						textField.setToolTipText(
+								"Set to FF for perfect DVs. Set to FA for shiny male or 7A for shiny female");
+						break;
+					case "Spe/Spc DVs":
+						setAddress("?,9b");
+						textField.setToolTipText(
+								"Set to FF for perfect DVs. Set to AA for shiny or FF for any hidden power with 70 base power");
+						break;
 
-					}
-
-					else if (choice.contains("DV")) {
-						textField.setVisible(true);
-						textField.setEnabled(true);
-						textField.setEditable(true);
-						comboBoxChoiceTwo.setEnabled(false);
-					
-						if (choice == "Atk/Def DVs")	{
-							setAddress("?,?z");
-							textField.setToolTipText("Set to FF for perfect DVs. Set to FA for shiny male or 7A for shiny female");
-						}
-							
-						else if (choice == "Spe/Spc DVs")	{
-							setAddress("?,9b");
-							textField.setToolTipText("Set to FF for perfect DVs. Set to AA for shiny or FF for any hidden power with 70 base power");
-						}
-					}
-
-					else if (choice == "Friendship") {
-						textField.setVisible(true);
-						textField.setEnabled(true);
-						textField.setEditable(true);
-						comboBoxChoiceTwo.setEnabled(false);
-
+					case "Friendship":
 						setAddress("?,9g");
 						textField.setToolTipText("Set to FF for maximum friendship, to 00 for minimum");
-					}
+						break;
 
-					else if (choice == "Pokerus") {
-						textField.setVisible(true);
-						textField.setEnabled(true);
-						textField.setEditable(true);
-						comboBoxChoiceTwo.setEnabled(false);
-
+					case "Pokerus":
 						setAddress("?,9h");
 						textField.setToolTipText("Set to 01 to active pokerus, 00 for off");
-					}
+						break;
 
-					else if (choice == "Level") {
-						textField.setVisible(true);
-						textField.setEnabled(true);
-						textField.setEditable(true);
-						comboBoxChoiceTwo.setEnabled(false);
-
+					case "Level":
 						setAddress("?,9k");
-						textField.setToolTipText("Use a Rare Candy on the Pokemon after changing (set to desired level minus 1)");
-					}
-					
-					else if (choice == "Item #2 Quantity") {
-						textField.setVisible(true);
-						textField.setEnabled(true);
-						textField.setEditable(true);
-						comboBoxChoiceTwo.setEnabled(false);
+						textField.setToolTipText(
+								"Use a Rare Candy on the Pokemon after changing (set to desired level minus 1)");
+						break;
 
+					case "Item #2 Quantity":
 						setAddress("PK,'t?");
 						textField.setToolTipText("Enter how many items you want (1-255)");
+						break;
+
+					case "Ball Item #2 Quantity":
+						setAddress("PK♀AA");
+						textField.setToolTipText("Enter how many items you want (1-255)");
+						break;
 					}
-					
-					else if (choice == "Ball Item #2 Quantity") {
+
+					// show the textfield and disable the other combo box if its not needed for the current selection
+					if (choice.contains("exp") || choice.contains("DV") || choice.contains("Friendship")
+							|| choice.contains("Pokerus") || choice.contains("Level")
+							|| choice.contains("Item #2 Quantity") || choice.contains("Ball Item #2 Quantity")) {
+
 						textField.setVisible(true);
 						textField.setEnabled(true);
 						textField.setEditable(true);
+
 						comboBoxChoiceTwo.setEnabled(false);
 
-						setAddress("PK♀AA");
-						textField.setToolTipText("Enter how many items you want (1-255)");
+						textField.setToolTipText("Set to FF for max stat experience or a decimal number for item quantities (1-255).");
 					}
 
 				}
@@ -269,21 +215,24 @@ public class TM17Calculator {
 			@Override
 			public void keyReleased(KeyEvent e) {
 
+				// get and change user values to uppercase so it matches values in db
 				String text = textField.getText().toUpperCase();
 
+				// get the current selected option of the combo box
 				String choice = comboBoxChoiceOne.getSelectedItem().toString();
-				System.out.println(choice);
 
-				if (choice == "Level" || choice.contains("Quantity")) {
+				// change user input from a decimal number to hex, then lookup hex in db to change to text to enter in the game
+				if (text.length() >= 1 && choice == "Level" || choice.contains("Quantity")) {
 					String hex = decimalToHex(Integer.parseInt(text)).toUpperCase();
 					System.out.println("hex: " + hex);
 
-					String result = runDBQuery("SELECT text FROM table1 WHERE hex='" + hex + "'");
+					String result = runDBQuery("SELECT text FROM table1 WHERE hex='" + hex + "'", "text").get(0);
 					lblFinalBoxName.setText(getAddress() + result);
 				}
 
+				// else expect hex values from user input
 				if (text.length() == 2 && choice != "Level" && !choice.contains("Quantity")) {
-					String result = runDBQuery("SELECT text FROM table1 WHERE hex='" + text + "'");
+					String result = runDBQuery("SELECT text FROM table1 WHERE hex='" + text + "'", "text").get(0);
 					lblFinalBoxName.setText(getAddress() + result);
 				}
 			}
@@ -318,7 +267,9 @@ public class TM17Calculator {
 					else if (choiceOne.contains("Move"))
 						choiceOne = "move";
 
-					String result = runDBQuery("SELECT text FROM table1 WHERE " + choiceOne + " = '" + choiceTwo + "'");
+					// this can return only 1 element, so return first element
+					String result = runDBQuery("SELECT text FROM table1 WHERE " + choiceOne + " = '" + choiceTwo + "'",
+							"text").get(0);
 					String finalBoxName = getAddress() + result;
 					lblFinalBoxName.setText(finalBoxName);
 
@@ -329,7 +280,7 @@ public class TM17Calculator {
 		JLabel lblBoxNameLabel = new JLabel("Change box 1 name to:");
 		lblBoxNameLabel.setBounds(240, 472, 152, 25);
 		frame.getContentPane().add(lblBoxNameLabel);
-		
+
 		JLabel lblNewLabel = new JLabel("Hover mouse over elements for instructions");
 		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 24));
 		lblNewLabel.setBounds(173, 11, 516, 33);
@@ -345,10 +296,11 @@ public class TM17Calculator {
 		return address;
 	}
 
-	private String runDBQuery(String sql) {
+	
+	private ArrayList<String> runDBQuery(String sql, String column) {
 
 		String jdbc = "jdbc:derby:database;create=true;useUnicode=yes;characterEncoding=UTF-8";
-		String write = null;
+		ArrayList<String> results = new ArrayList<String>();
 
 		try {
 			// connect to database and run the sql query
@@ -357,18 +309,16 @@ public class TM17Calculator {
 			Statement statement = connection.createStatement();
 			ResultSet rs = statement.executeQuery(sql);
 
-			// get results, we're only searching in the 'text' column for this
+			// get results that appear in the desired column
 			while (rs.next()) {
-
-				System.out.println(rs.getString("text"));
-				write = rs.getString("text");
+				results.add(rs.getString(column));
 			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
-		return write;
+		return results;
 
 	}
 
