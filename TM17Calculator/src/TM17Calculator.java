@@ -73,7 +73,7 @@ public class TM17Calculator {
 				"HP Stat exp", "Attack Stat exp", "Defense Stat exp", "Speed Stat exp", "Special Stat exp",
 				"Atk/Def DVs", "Spe/Spc DVs", "Friendship", "Pokerus", "Level", "Item #2 ID", "Item #2 Quantity",
 				"Ball Item #2 ID", "Ball Item #2 Quantity" };
-		
+
 		// Add array elements to the combo box to start.
 		JComboBox comboBoxChoiceOne = new JComboBox(choiceOneOptions);
 		comboBoxChoiceOne.setToolTipText("Edit Party Pokemon #3");
@@ -91,8 +91,10 @@ public class TM17Calculator {
 
 					// set address and tooltip depending on what is selected
 					// need to find a better way to better optimize several conditionals
-					// when a choice is made, see what the user clicked on and change info in the other combo box
-					// for example if Change Species is clicked on right here it shows list of pokemon
+					// when a choice is made, see what the user clicked on and change info in the
+					// other combo box
+					// for example if Change Species is clicked on right here it shows list of
+					// pokemon
 					switch (choice) {
 					case "Change Species":
 						comboBoxChoiceTwo.setModel(new DefaultComboBoxModel(
@@ -100,40 +102,26 @@ public class TM17Calculator {
 						setAddress("?,?e");
 						break;
 					case "Change Held Item":
-						comboBoxChoiceTwo.setModel(
-								new DefaultComboBoxModel(runDBQuery("SELECT item FROM table1", "item").toArray()));
 						setAddress("?,?f");
 						break;
 
 					case "Move 1":
-						comboBoxChoiceTwo.setModel(
-								new DefaultComboBoxModel(runDBQuery("SELECT move FROM table1", "move").toArray()));
 						setAddress("?,?g");
 						break;
 					case "Move 2":
-						comboBoxChoiceTwo.setModel(
-								new DefaultComboBoxModel(runDBQuery("SELECT move FROM table1", "move").toArray()));
 						setAddress("?,?h");
 						break;
 					case "Move 3":
-						comboBoxChoiceTwo.setModel(
-								new DefaultComboBoxModel(runDBQuery("SELECT move FROM table1", "move").toArray()));
 						setAddress("?,?i");
 						break;
 					case "Move 4":
-						comboBoxChoiceTwo.setModel(
-								new DefaultComboBoxModel(runDBQuery("SELECT move FROM table1", "move").toArray()));
 						setAddress("?,?j");
 						break;
 
 					case "Item #2 ID":
-						comboBoxChoiceTwo.setModel(
-								new DefaultComboBoxModel(runDBQuery("SELECT item FROM table1", "item").toArray()));
 						setAddress("PK,'s?");
 						break;
 					case "Ball Item #2 ID":
-						comboBoxChoiceTwo.setModel(
-								new DefaultComboBoxModel(runDBQuery("SELECT item FROM table1", "item").toArray()));
 						setAddress("PK, A");
 						break;
 
@@ -191,7 +179,8 @@ public class TM17Calculator {
 						break;
 					}
 
-					// show the textfield and disable the other combo box if its not needed for the current selection
+					// show the textfield and disable the other combo box if its not needed for the
+					// current selection
 					if (choice.contains("exp") || choice.contains("DV") || choice.contains("Friendship")
 							|| choice.contains("Pokerus") || choice.contains("Level")
 							|| choice.contains("Item #2 Quantity") || choice.contains("Ball Item #2 Quantity")) {
@@ -202,7 +191,17 @@ public class TM17Calculator {
 
 						comboBoxChoiceTwo.setEnabled(false);
 
-						textField.setToolTipText("Set to FF for max stat experience or a decimal number for item quantities (1-255).");
+						textField.setToolTipText(
+								"Set to FF for max stat experience or a decimal number for item quantities (1-255).");
+					}
+
+					else if (choice.contains("Move")) {
+						comboBoxChoiceTwo.setModel(
+								new DefaultComboBoxModel(runDBQuery("SELECT move FROM table1", "move").toArray()));
+					}
+					else if(choice.contains("Item"))	{
+						comboBoxChoiceTwo.setModel(
+								new DefaultComboBoxModel(runDBQuery("SELECT item FROM table1", "item").toArray()));
 					}
 
 				}
@@ -221,7 +220,8 @@ public class TM17Calculator {
 				// get the current selected option of the combo box
 				String choice = comboBoxChoiceOne.getSelectedItem().toString();
 
-				// change user input from a decimal number to hex, then lookup hex in db to change to text to enter in the game
+				// change user input from a decimal number to hex, then lookup hex in db to
+				// change to text to enter in the game
 				if (text.length() >= 1 && choice == "Level" || choice.contains("Quantity")) {
 					String hex = decimalToHex(Integer.parseInt(text)).toUpperCase();
 					System.out.println("hex: " + hex);
@@ -296,7 +296,6 @@ public class TM17Calculator {
 		return address;
 	}
 
-	
 	private ArrayList<String> runDBQuery(String sql, String column) {
 
 		String jdbc = "jdbc:derby:database;create=true;useUnicode=yes;characterEncoding=UTF-8";
