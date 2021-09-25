@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -23,6 +24,8 @@ public class TM17Calculator {
 	private String address;
 	private JTextField textField;
 
+	private HashMap<String, String> hashmap = new HashMap<String, String>();
+
 	/*** Launch the application. */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -38,8 +41,15 @@ public class TM17Calculator {
 
 	}
 
+	private void createHashMap() {
+		for (int i = 0; i < getChoiceOneOptions().length; i++) {
+			hashmap.put(getChoiceOneOptions()[i], getAddressList()[i]);
+		}
+	}
+
 	/*** Create the application. */
 	public TM17Calculator() {
+		createHashMap();
 		initialize();
 	}
 
@@ -66,16 +76,10 @@ public class TM17Calculator {
 				.setModel(new DefaultComboBoxModel(runDBQuery("SELECT pokemon FROM table1", "pokemon").toArray()));
 		comboBoxChoiceTwo.setBounds(21, 195, 152, 33);
 		frame.getContentPane().add(comboBoxChoiceTwo);
-		setAddress("?,?e");
-
-		// Options that are currently supported:
-		String choiceOneOptions[] = { "Change Species", "Change Held Item", "Move 1", "Move 2", "Move 3", "Move 4",
-				"HP Stat exp", "Attack Stat exp", "Defense Stat exp", "Speed Stat exp", "Special Stat exp",
-				"Atk/Def DVs", "Spe/Spc DVs", "Friendship", "Pokerus", "Level", "Item #2 ID", "Item #2 Quantity",
-				"Ball Item #2 ID", "Ball Item #2 Quantity" };
+		setAddress("Change Species");
 
 		// Add array elements to the combo box to start.
-		JComboBox comboBoxChoiceOne = new JComboBox(choiceOneOptions);
+		JComboBox comboBoxChoiceOne = new JComboBox(getChoiceOneOptions());
 		comboBoxChoiceOne.setToolTipText("Edit Party Pokemon #3");
 
 		comboBoxChoiceOne.addItemListener(new ItemListener() {
@@ -89,96 +93,7 @@ public class TM17Calculator {
 					textField.setVisible(false);
 					comboBoxChoiceTwo.setEnabled(true);
 
-					// set address and tooltip depending on what is selected
-					// need to find a better way to better optimize several conditionals
-					// when a choice is made, see what the user clicked on and change info in the
-					// other combo box
-					// for example if Change Species is clicked on right here it shows list of
-					// pokemon
-					switch (choice) {
-					case "Change Species":
-						comboBoxChoiceTwo.setModel(new DefaultComboBoxModel(
-								runDBQuery("SELECT pokemon FROM table1", "pokemon").toArray()));
-						setAddress("?,?e");
-						break;
-					case "Change Held Item":
-						setAddress("?,?f");
-						break;
-
-					case "Move 1":
-						setAddress("?,?g");
-						break;
-					case "Move 2":
-						setAddress("?,?h");
-						break;
-					case "Move 3":
-						setAddress("?,?i");
-						break;
-					case "Move 4":
-						setAddress("?,?j");
-						break;
-
-					case "Item #2 ID":
-						setAddress("PK,'s?");
-						break;
-					case "Ball Item #2 ID":
-						setAddress("PK, A");
-						break;
-
-					case "HP Stat exp":
-						setAddress(" ?,?p");
-						break;
-					case "Attack Stat exp":
-						setAddress("?,?r");
-						break;
-					case "Defense Stat exp":
-						setAddress("?,?t");
-						break;
-					case "Speed Stat exp":
-						setAddress("?,?v");
-						break;
-					case "Special Stat exp":
-						setAddress("?,?x");
-						break;
-
-					case "Atk/Def DVs":
-						setAddress("?,?z");
-						textField.setToolTipText(
-								"Set to FF for perfect DVs. Set to FA for shiny male or 7A for shiny female");
-						break;
-					case "Spe/Spc DVs":
-						setAddress("?,9b");
-						textField.setToolTipText(
-								"Set to FF for perfect DVs. Set to AA for shiny or FF for any hidden power with 70 base power");
-						break;
-
-					case "Friendship":
-						setAddress("?,9g");
-						textField.setToolTipText("Set to FF for maximum friendship, to 00 for minimum");
-						break;
-
-					case "Pokerus":
-						setAddress("?,9h");
-						textField.setToolTipText("Set to 01 to active pokerus, 00 for off");
-						break;
-
-					case "Level":
-						setAddress("?,9k");
-						textField.setToolTipText(
-								"Use a Rare Candy on the Pokemon after changing (set to desired level minus 1)");
-						break;
-
-					case "Item #2 Quantity":
-						setAddress("PK,'t?");
-						textField.setToolTipText("Enter how many items you want (1-255)");
-						break;
-
-					case "Ball Item #2 Quantity":
-						setAddress("PK♀AA");
-						textField.setToolTipText("Enter how many items you want (1-255)");
-						break;
-					}
-
+					setAddress(choice);
 					// show the textfield and disable the other combo box if its not needed for the
 					// current selection
 					if (choice.contains("exp") || choice.contains("DV") || choice.contains("Friendship")
@@ -198,8 +113,7 @@ public class TM17Calculator {
 					else if (choice.contains("Move")) {
 						comboBoxChoiceTwo.setModel(
 								new DefaultComboBoxModel(runDBQuery("SELECT move FROM table1", "move").toArray()));
-					}
-					else if(choice.contains("Item"))	{
+					} else if (choice.contains("Item")) {
 						comboBoxChoiceTwo.setModel(
 								new DefaultComboBoxModel(runDBQuery("SELECT item FROM table1", "item").toArray()));
 					}
@@ -288,8 +202,11 @@ public class TM17Calculator {
 
 	}
 
-	private void setAddress(String address) {
-		this.address = address;
+	private void setAddress(String choice) {
+
+		String result = hashmap.get(choice);
+		this.address = result;
+
 	}
 
 	private String getAddress() {
@@ -326,5 +243,22 @@ public class TM17Calculator {
 		String result = Integer.toHexString(numberToConvert);
 		return result;
 
+	}
+
+	private String[] getChoiceOneOptions() {
+
+		String choiceOneOptions[] = { "Change Species", "Change Held Item", "Move 1", "Move 2", "Move 3", "Move 4",
+				"HP Stat exp", "Attack Stat exp", "Defense Stat exp", "Speed Stat exp", "Special Stat exp",
+				"Atk/Def DVs", "Spe/Spc DVs", "Friendship", "Pokerus", "Level", "Item #2 ID", "Item #2 Quantity",
+				"Ball Item #2 ID", "Ball Item #2 Quantity" };
+
+		return choiceOneOptions;
+	}
+
+	private String[] getAddressList() {
+		String addressList[] = { "?,?e", "?,?f", "?,?g", "?,?h", "?,?i", "?,?j", "PK,'s?", "PK, A", "?,?p", "?,?r",
+				"?,?t", "?,?v", "?,?x", "?,?z", "?,9b", "?,9g", "?,9h", "?,9k", "PKn't?", "PK♀AA" };
+
+		return addressList;
 	}
 }
