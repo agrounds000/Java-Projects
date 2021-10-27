@@ -6,4 +6,4 @@ Originally a user would have to constantly swap between two different tabs: one 
 This project was written using Apache Derby as the database, and Window Builder for the GUI.
 
 ## Known Bugs
-Some Pokemon that have special characters in their name (such as Nidoran♂ and Nidoran♀) do not show up properly. Also Pokemon that have special characters that must be written into some addresses do not show up properly in the GUI and are either emitted entirely or shows a random symbol. For example, Heracross should return 'Pk♀' but instead shows something else. This is likely an encoding/decoding issue when reading information from the database.
+Some Pokemon that have special characters in their name (such as Nidoran♂ and Nidoran♀) do not show up properly in the list of Pokemon.
