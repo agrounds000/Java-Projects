@@ -8,6 +8,10 @@
 *.ear
 *.nar
 hs_err_pid*
+*.properties
+*.txt
+database/
+*.log
 
 ##############################
 ## Maven
